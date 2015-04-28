@@ -37,6 +37,7 @@ import java.util.UUID;
 
 import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.exception.MailboxNotFoundException;
+import org.apache.james.mailbox.model.MailboxACL;
 import org.apache.james.mailbox.model.MailboxPath;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -144,4 +145,8 @@ public class CassandraMailboxMapper implements MailboxMapper<UUID> {
         return transaction.run();
     }
 
+    @Override
+    public void updateACL(Mailbox<UUID> mailbox, MailboxACL.MailboxACLCommand mailboxACLCommand) throws MailboxException {
+        mailbox.setACL(mailbox.getACL().apply(mailboxACLCommand));
+    }
 }

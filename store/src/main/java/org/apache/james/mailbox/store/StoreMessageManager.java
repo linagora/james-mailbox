@@ -786,61 +786,13 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
         return messageMapper.findFirstUnseenMessageUid(getMailboxEntity());
     }
 
-    /**
-     * @see org.apache.james.mailbox.MessageManager#hasRight(org.apache.james.mailbox.MailboxACL.MailboxACLRight,
-     *      org.apache.james.mailbox.MailboxSession)
-     */
-    public boolean hasRight(MailboxACLRight right, MailboxSession session) throws UnsupportedRightException {
-        User user = session.getUser();
-        String userName = user != null ? user.getUserName() : null;
-
-        return aclResolver.hasRight(userName, groupMembershipResolver, right, mailbox.getACL(), mailbox.getUser(), isGroupFolder(session));
-    }
-
-    /**
-     * @see org.apache.james.mailbox.MessageManager#myRights(org.apache.james.mailbox.MailboxSession)
-     */
-    @Override
-    public MailboxACLRights myRights(MailboxSession session) throws MailboxException {
+    private MailboxACLRights myRights(MailboxSession session) throws MailboxException {
         User user = session.getUser();
         if (user != null) {
-            return aclResolver.resolveRights(user.getUserName(), groupMembershipResolver, mailbox.getACL(), mailbox.getUser(), isGroupFolder(session));
+            return aclResolver.resolveRights(user.getUserName(), groupMembershipResolver, mailbox.getACL(), mailbox.getUser(), new GroupFolderResolver(session).isGroupFolder(mailbox));
         } else {
             return SimpleMailboxACL.NO_RIGHTS;
         }
-    }
-
-    /**
-     * @see org.apache.james.mailbox.MessageManager#listRigths(java.lang.String, org.apache.james.mailbox.MailboxSession)
-     */
-    public MailboxACLRights[] listRigths(final MailboxACLEntryKey key, MailboxSession session) throws UnsupportedRightException {
-        return aclResolver.listRights(key, groupMembershipResolver, mailbox.getUser(), isGroupFolder(session));
-    }
-
-    /**
-     * @throws UnsupportedRightException 
-     * @see org.apache.james.mailbox.MessageManager#setRights(java.lang.String, org.apache.james.mailbox.model.MailboxACL.EditMode, org.apache.james.mailbox.model.MailboxACL.MailboxACLRights)
-     */
-    @Override
-    public void setRights(MailboxACLEntryKey mailboxACLEntryKey, EditMode editMode, MailboxACLRights mailboxAclRights) throws UnsupportedRightException {
-        MailboxACL acl = mailbox.getACL();
-        if (acl == null) {
-            acl = SimpleMailboxACL.EMPTY;
-        }
-        switch (editMode) {
-        case ADD:
-            acl = acl.union(mailboxACLEntryKey, mailboxAclRights);
-            break;
-        case REMOVE:
-            acl = acl.except(mailboxACLEntryKey, mailboxAclRights);
-            break;
-        case REPLACE:
-            acl = acl.replace(mailboxACLEntryKey, mailboxAclRights);
-            break;
-        default:
-            throw new IllegalStateException("Unexpected "+ EditMode.class.getName() +"."+ editMode);
-        }
-        mailbox.setACL(acl);
     }
 
     /**
@@ -852,19 +804,6 @@ public class StoreMessageManager<Id> implements org.apache.james.mailbox.Message
      * @throws UnsupportedRightException
      */
     protected MailboxACL getResolvedMailboxACL(MailboxSession mailboxSession) throws UnsupportedRightException {
-        return aclResolver.applyGlobalACL(mailbox.getACL(), isGroupFolder(mailboxSession));
+        return aclResolver.applyGlobalACL(mailbox.getACL(), new GroupFolderResolver(mailboxSession).isGroupFolder(mailbox));
     }
-
-    /**
-     * Returns true if the current mailbox does not reside neither in private
-     * nor other users' namespace.
-     * 
-     * @param session
-     * @return
-     */
-    protected boolean isGroupFolder(MailboxSession session) {
-        final String ns = mailbox.getNamespace();
-        return ns == null || (!ns.equals(session.getPersonalSpace()) && !ns.equals(session.getOtherUsersSpace()));
-    }
-
 }

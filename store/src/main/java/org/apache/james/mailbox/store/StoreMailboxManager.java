@@ -34,12 +34,14 @@ import org.apache.james.mailbox.exception.BadCredentialsException;
 import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.exception.MailboxExistsException;
 import org.apache.james.mailbox.exception.MailboxNotFoundException;
+import org.apache.james.mailbox.model.MailboxACL;
 import org.apache.james.mailbox.model.MailboxConstants;
 import org.apache.james.mailbox.model.MailboxMetaData;
 import org.apache.james.mailbox.model.MailboxMetaData.Selectability;
 import org.apache.james.mailbox.model.MailboxPath;
 import org.apache.james.mailbox.model.MailboxQuery;
 import org.apache.james.mailbox.model.MessageRange;
+import org.apache.james.mailbox.model.SimpleMailboxACL;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.impl.SimpleMailbox;
@@ -590,4 +592,46 @@ public class StoreMailboxManager<Id> implements MailboxManager {
     public void removeGlobalListener(MailboxListener listener, MailboxSession session) throws MailboxException {
         delegatingListener.removeGlobalListener(listener, session);
     }
+
+    @Override
+    public boolean hasRight(MailboxPath mailboxPath, MailboxACL.MailboxACLRight right, MailboxSession session) throws MailboxException {
+        MailboxMapper<Id> mapper = mailboxSessionMapperFactory.getMailboxMapper(session);
+        Mailbox<Id> mailbox = mapper.findMailboxByPath(mailboxPath);
+        MailboxSession.User user = session.getUser();
+        String userName = user != null ? user.getUserName() : null;
+        return aclResolver.hasRight(userName, groupMembershipResolver, right, mailbox.getACL(), mailbox.getUser(), new GroupFolderResolver(session).isGroupFolder(mailbox));
+    }
+
+    @Override
+    public MailboxACL.MailboxACLRights myRights(MailboxPath mailboxPath, MailboxSession session) throws MailboxException {
+        MailboxMapper<Id> mapper = mailboxSessionMapperFactory.getMailboxMapper(session);
+        Mailbox<Id> mailbox = mapper.findMailboxByPath(mailboxPath);
+        MailboxSession.User user = session.getUser();
+        if (user != null) {
+            return aclResolver.resolveRights(user.getUserName(), groupMembershipResolver, mailbox.getACL(), mailbox.getUser(), new GroupFolderResolver(session).isGroupFolder(mailbox));
+        } else {
+            return SimpleMailboxACL.NO_RIGHTS;
+        }
+    }
+
+    public MailboxACL.MailboxACLRights[] listRigths(MailboxPath mailboxPath, final MailboxACL.MailboxACLEntryKey key, MailboxSession session) throws MailboxException {
+        final MailboxMapper<Id> mapper = mailboxSessionMapperFactory.getMailboxMapper(session);
+        Mailbox<Id> mailbox = mapper.findMailboxByPath(mailboxPath);
+        return aclResolver.listRights(key, groupMembershipResolver, mailbox.getUser(), new GroupFolderResolver(session).isGroupFolder(mailbox));
+    }
+
+    @Override
+    public void setRights(MailboxPath mailboxPath, final MailboxACL.MailboxACLCommand mailboxACLCommand, MailboxSession session) throws MailboxException {
+        final MailboxMapper<Id> mapper = mailboxSessionMapperFactory.getMailboxMapper(session);
+        final Mailbox<Id> mailbox = mapper.findMailboxByPath(mailboxPath);
+        mapper.execute(
+            new Mapper.VoidTransaction() {
+                @Override
+                public void runVoid() throws MailboxException {
+                    mapper.updateACL(mailbox, mailboxACLCommand);
+                }
+            }
+        );
+    }
+
 }

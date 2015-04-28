@@ -25,10 +25,13 @@ import org.apache.james.mailbox.exception.BadCredentialsException;
 import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.exception.MailboxExistsException;
 import org.apache.james.mailbox.exception.MailboxNotFoundException;
+import org.apache.james.mailbox.exception.UnsupportedRightException;
+import org.apache.james.mailbox.model.MailboxACL;
 import org.apache.james.mailbox.model.MailboxMetaData;
 import org.apache.james.mailbox.model.MailboxPath;
 import org.apache.james.mailbox.model.MailboxQuery;
 import org.apache.james.mailbox.model.MessageRange;
+import org.apache.james.mailbox.model.SimpleMailboxACL;
 import org.slf4j.Logger;
 
 /**
@@ -247,6 +250,66 @@ public interface MailboxManager extends RequestAware, MailboxListenerSupport {
      *             when logout fails
      */
     void logout(MailboxSession session, boolean force) throws MailboxException;
+
+    /**
+     * Tells whether the given {@link MailboxSession}'s user has the given
+     * {@link MailboxACL.MailboxACLRight} for this {@link MessageManager}'s mailbox.
+     *
+     * @param session MailboxSession of the user we want to check 
+     * @param right Right we want to check.
+     * @param session Session of the user we want to check this right against.
+     * @return true if the given {@link MailboxSession}'s user has the given
+     *         {@link MailboxACL.MailboxACLRight} for this {@link MessageManager}'s
+     *         mailbox; false otherwise.
+     * @throws MailboxException
+     */
+    public boolean hasRight(MailboxPath mailboxPath, MailboxACL.MailboxACLRight right, MailboxSession session) throws MailboxException;
+
+    /**
+     * Returns the rights applicable to the user who has sent the current
+     * request on the mailbox designated by this mailboxPath.
+     *
+     * @param mailboxPath Path of the mailbox you want to get your rights on.
+     * @param session The session used to determine the user we should retrieve the rights of.
+     * @return the rights applicable to the user who has sent the request,
+     *         returns {@link SimpleMailboxACL#NO_RIGHTS} if
+     *         {@code session.getUser()} is null.
+     * @throws UnsupportedRightException
+     */
+    public abstract MailboxACL.MailboxACLRights myRights(MailboxPath mailboxPath, MailboxSession session) throws MailboxException;
+
+    /**
+     * Computes a result suitable for the LISTRIGHTS IMAP command. The result is
+     * computed for this mailbox and the given {@code identifier}.
+     *
+     * From RFC 4314 section 3.7:
+     * The first element of the resulting array contains the (possibly empty)
+     * set of rights the identifier will always be granted in the mailbox.
+     * Following this are zero or more right sets the identifier can be granted
+     * in the mailbox. Rights mentioned in the same set are tied together. The
+     * server MUST either grant all tied rights to the identifier in the mailbox
+     * or grant none.
+     *
+     * The same right MUST NOT be listed more than once in the LISTRIGHTS
+     * command.
+     *
+     * @param mailboxPath Path of the mailbox you want to get the rights list.
+     * @param identifier
+     *            the identifier from the LISTRIGHTS command.
+     * @param session Right of the user performing the request.
+     * @return result suitable for the LISTRIGHTS IMAP command
+     * @throws UnsupportedRightException
+     */
+    public MailboxACL.MailboxACLRights[] listRigths(MailboxPath mailboxPath, MailboxACL.MailboxACLEntryKey identifier, MailboxSession session) throws MailboxException;
+
+    /**
+     * Update the Mailbox ACL of the designated mailbox. We can either ADD REPLACE or REMOVE entries.
+     *
+     * @param mailboxACLCommand Update to perform.
+     * @throws UnsupportedRightException
+     */
+    void setRights(MailboxPath mailboxPath, MailboxACL.MailboxACLCommand mailboxACLCommand, MailboxSession session) throws MailboxException;
+
 
     /**
      * Return a unmodifiable {@link List} of {@link MailboxPath} objects

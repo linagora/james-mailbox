@@ -27,7 +27,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.apache.james.mailbox.exception.UnsupportedRightException;
-import org.apache.james.mailbox.model.MailboxACL.MailboxACLRight;
 
 /**
  * Default implementation of {@link MailboxACL}.
@@ -798,6 +797,54 @@ public class SimpleMailboxACL implements MailboxACL {
 
     }
 
+    public static class SimpleMailboxACLCommand implements MailboxACLCommand {
+        private MailboxACLEntryKey key;
+        private EditMode editMode;
+        private MailboxACLRights rights;
+
+        public SimpleMailboxACLCommand(MailboxACLEntryKey key, EditMode editMode, MailboxACLRights rights) {
+            this.key = key;
+            this.editMode = editMode;
+            this.rights = rights;
+        }
+
+        @Override
+        public MailboxACLEntryKey getEntryKey() {
+            return key;
+        }
+
+        @Override
+        public EditMode getEditMode() {
+            return editMode;
+        }
+
+        @Override
+        public MailboxACLRights getRights() {
+            return rights;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof SimpleMailboxACLCommand)) return false;
+
+            SimpleMailboxACLCommand that = (SimpleMailboxACLCommand) o;
+
+            if (key != null ? !key.equals(that.key) : that.key != null) return false;
+            if (editMode != that.editMode) return false;
+            return !(rights != null ? !rights.equals(that.rights) : that.rights != null);
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = key != null ? key.hashCode() : 0;
+            result = 31 * result + (editMode != null ? editMode.hashCode() : 0);
+            result = 31 * result + (rights != null ? rights.hashCode() : 0);
+            return result;
+        }
+    }
+
     public static final MailboxACLEntryKey ANYBODY_KEY;
     public static final MailboxACLEntryKey ANYBODY_NEGATIVE_KEY;
     public static final MailboxACLEntryKey AUTHENTICATED_KEY;
@@ -924,6 +971,19 @@ public class SimpleMailboxACL implements MailboxACL {
             return entries == ens || (entries != null && entries.equals(ens));
         }
         return false;
+    }
+
+    @Override
+    public MailboxACL apply(MailboxACLCommand aclUpdate) throws UnsupportedRightException {
+        switch (aclUpdate.getEditMode()) {
+            case ADD:
+                return union(aclUpdate.getEntryKey(), aclUpdate.getRights());
+            case REMOVE:
+                return except(aclUpdate.getEntryKey(), aclUpdate.getRights());
+            case REPLACE:
+                return replace(aclUpdate.getEntryKey(), aclUpdate.getRights());
+        }
+        throw new RuntimeException("Unknown edit mode");
     }
 
     /**

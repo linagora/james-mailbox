@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.exception.MailboxNotFoundException;
+import org.apache.james.mailbox.model.MailboxACL;
 import org.apache.james.mailbox.model.MailboxPath;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.transaction.Mapper;
@@ -82,7 +83,15 @@ public interface MailboxMapper<Id> extends Mapper {
      */
     boolean hasChildren(Mailbox<Id> mailbox, char delimiter)
             throws MailboxException, MailboxNotFoundException;
-    
+
+    /**
+     * Update the ACL of the stored mailbox.
+     *
+     * @param mailbox Mailbox for whom we want to update ACL
+     * @param mailboxACLCommand Update to perform
+     */
+    void updateACL(Mailbox<Id> mailbox, MailboxACL.MailboxACLCommand mailboxACLCommand) throws MailboxException;
+
     /**
      * Return a unmodifable {@link List} of all {@link Mailbox} 
      * 

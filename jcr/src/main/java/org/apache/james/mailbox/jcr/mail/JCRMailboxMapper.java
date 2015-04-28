@@ -39,6 +39,7 @@ import org.apache.james.mailbox.exception.MailboxNotFoundException;
 import org.apache.james.mailbox.jcr.AbstractJCRScalingMapper;
 import org.apache.james.mailbox.jcr.MailboxSessionJCRRepository;
 import org.apache.james.mailbox.jcr.mail.model.JCRMailbox;
+import org.apache.james.mailbox.model.MailboxACL;
 import org.apache.james.mailbox.model.MailboxPath;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -232,5 +233,9 @@ public class JCRMailboxMapper extends AbstractJCRScalingMapper implements Mailbo
             throw new MailboxException("Unable to retrieve the list of mailboxes", e);
         }
     }
- 
+
+    @Override
+    public void updateACL(Mailbox<String> mailbox, MailboxACL.MailboxACLCommand mailboxACLCommand) throws MailboxException {
+        mailbox.setACL(mailbox.getACL().apply(mailboxACLCommand));
+    }
 }

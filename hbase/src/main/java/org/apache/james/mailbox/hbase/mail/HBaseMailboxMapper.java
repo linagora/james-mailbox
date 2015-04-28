@@ -54,6 +54,7 @@ import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.exception.MailboxNotFoundException;
 import org.apache.james.mailbox.hbase.HBaseNonTransactionalMapper;
 import org.apache.james.mailbox.hbase.mail.model.HBaseMailbox;
+import org.apache.james.mailbox.model.MailboxACL;
 import org.apache.james.mailbox.model.MailboxPath;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -391,5 +392,10 @@ public class HBaseMailboxMapper extends HBaseNonTransactionalMapper implements M
             // TODO Temporary commented, was not compiling.
 //            IOUtils.closeStream(mailboxes);
         }
+    }
+
+    @Override
+    public void updateACL(Mailbox<UUID> mailbox, MailboxACL.MailboxACLCommand mailboxACLCommand) throws MailboxException {
+        mailbox.setACL(mailbox.getACL().apply(mailboxACLCommand));
     }
 }

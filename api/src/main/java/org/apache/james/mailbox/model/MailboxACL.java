@@ -205,6 +205,15 @@ public interface MailboxACL {
      * Allows distinguishing between users, groups and special names (see
      * {@link SpecialName}).
      */
+
+    public interface MailboxACLCommand {
+        MailboxACLEntryKey getEntryKey();
+
+        EditMode getEditMode();
+
+        MailboxACLRights getRights();
+    };
+
     enum NameType {
         group, special, user
     };
@@ -239,6 +248,15 @@ public interface MailboxACL {
      * SETACL third argument prefix
      */
     public static final char REMOVE_RIGHTS_MARKER = '-';
+
+    /**
+     * Apply the given ACL update on current ACL and return the result as a new ACL.
+     *
+     * @param aclUpdate Update to perform
+     * @return Copy of current ACL updated
+     * @throws UnsupportedRightException
+     */
+    MailboxACL apply(MailboxACLCommand aclUpdate) throws UnsupportedRightException;
 
     /**
      * Performs the set theoretic operation of relative complement of toRemove

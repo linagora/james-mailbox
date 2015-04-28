@@ -169,63 +169,6 @@ public interface MessageManager {
      */
     MessageResultIterator getMessages(MessageRange set, FetchGroup fetchGroup, MailboxSession mailboxSession) throws MailboxException;
 
-    /**
-     * Tells whether the given {@link MailboxSession}'s user has the given
-     * {@link MailboxACLRight} for this {@link MessageManager}'s mailbox.
-     * 
-     * @param right
-     * @param session
-     * @return true if the given {@link MailboxSession}'s user has the given
-     *         {@link MailboxACLRight} for this {@link MessageManager}'s
-     *         mailbox; false otherwise.
-     * @throws MailboxException
-     */
-    public boolean hasRight(MailboxACLRight right, MailboxSession session) throws MailboxException;
-
-    /**
-     * Returns the rights applicable to the user who has sent the current
-     * request.
-     * 
-     * @param session
-     * @return the rights applicable to the user who has sent the request,
-     *         returns {@link SimpleMailboxACL#NO_RIGHTS} if
-     *         {@code session.getUser()} is null.
-     * @throws UnsupportedRightException
-     */
-    public abstract MailboxACLRights myRights(MailboxSession session) throws MailboxException;
-
-    /**
-     * Computes a result suitable for the LISTRIGHTS IMAP command. The result is
-     * computed for this mailbox and the given {@code identifier}.
-     * 
-     * From RFC 4314 section 3.7:
-     * The first element of the resulting array contains the (possibly empty)
-     * set of rights the identifier will always be granted in the mailbox.
-     * Following this are zero or more right sets the identifier can be granted
-     * in the mailbox. Rights mentioned in the same set are tied together. The
-     * server MUST either grant all tied rights to the identifier in the mailbox
-     * or grant none.
-     * 
-     * The same right MUST NOT be listed more than once in the LISTRIGHTS
-     * command.
-     * 
-     * @param identifier
-     *            the identifier from the LISTRIGHTS command.
-     * @param session
-     * @return
-     * @throws UnsupportedRightException
-     */
-    public MailboxACLRights[] listRigths(MailboxACLEntryKey identifier, MailboxSession session) throws UnsupportedRightException;
-
-    /**
-     * TODO setRights.
-     * 
-     * @param identifier
-     * @param editMode
-     * @param mailboxAclRights
-     * @throws UnsupportedRightException
-     */
-    void setRights(MailboxACLEntryKey identifier, EditMode editMode, MailboxACLRights mailboxAclRights) throws UnsupportedRightException;
 
     /**
      * Gets current meta data for the mailbox.<br>

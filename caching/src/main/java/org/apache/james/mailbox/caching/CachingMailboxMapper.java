@@ -3,6 +3,7 @@ import java.util.List;
 
 import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.exception.MailboxNotFoundException;
+import org.apache.james.mailbox.model.MailboxACL;
 import org.apache.james.mailbox.model.MailboxPath;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -75,6 +76,11 @@ public class CachingMailboxMapper<Id> implements MailboxMapper<Id> {
 	public List<Mailbox<Id>> list() throws MailboxException {
 		// TODO possible to meaningfully cache it? is it used at all?
 		return underlying.list();
+	}
+
+	@Override
+	public void updateACL(Mailbox<Id> mailbox, MailboxACL.MailboxACLCommand mailboxACLCommand) throws MailboxException {
+		mailbox.setACL(mailbox.getACL().apply(mailboxACLCommand));
 	}
 
 	private void invalidate(Mailbox<Id> mailbox) {

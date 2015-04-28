@@ -32,6 +32,7 @@ import org.apache.james.mailbox.exception.MailboxExistsException;
 import org.apache.james.mailbox.exception.MailboxNotFoundException;
 import org.apache.james.mailbox.jpa.JPATransactionalMapper;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
+import org.apache.james.mailbox.model.MailboxACL;
 import org.apache.james.mailbox.model.MailboxPath;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -166,5 +167,10 @@ public class JPAMailboxMapper extends JPATransactionalMapper implements MailboxM
         } catch (PersistenceException e) {
             throw new MailboxException("Delete of mailboxes failed", e);
         } 
+    }
+
+    @Override
+    public void updateACL(Mailbox<Long> mailbox, MailboxACL.MailboxACLCommand mailboxACLCommand) throws MailboxException {
+        mailbox.setACL(mailbox.getACL().apply(mailboxACLCommand));
     }
 }

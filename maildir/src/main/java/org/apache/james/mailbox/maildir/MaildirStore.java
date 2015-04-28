@@ -26,13 +26,13 @@ import org.apache.james.mailbox.MailboxPathLocker;
 import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.exception.MailboxNotFoundException;
-import org.apache.james.mailbox.maildir.mail.model.MaildirMailbox;
 import org.apache.james.mailbox.model.MailboxConstants;
 import org.apache.james.mailbox.model.MailboxPath;
 import org.apache.james.mailbox.store.JVMMailboxPathLocker;
 import org.apache.james.mailbox.store.mail.ModSeqProvider;
 import org.apache.james.mailbox.store.mail.UidProvider;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
+import org.apache.james.mailbox.store.mail.model.impl.SimpleMailbox;
 
 public class MaildirStore implements UidProvider<Integer>, ModSeqProvider<Integer>{
 
@@ -125,7 +125,9 @@ public class MaildirStore implements UidProvider<Integer>, ModSeqProvider<Intege
         MaildirFolder folder = new MaildirFolder(mailboxFile.getAbsolutePath(), mailboxPath, locker);
         folder.setMessageNameStrictParse(isMessageNameStrictParse());
         try {
-            return new MaildirMailbox<Integer>(session, mailboxPath, folder);
+            Mailbox<Integer> loadedMailbox = new SimpleMailbox<Integer>(mailboxPath, folder.getUidValidity());
+            loadedMailbox.setACL(folder.getACL(session));
+            return loadedMailbox;
         } catch (IOException e) {
             throw new MailboxException("Unable to load Mailbox " + mailboxPath, e);
         }
