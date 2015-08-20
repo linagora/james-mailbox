@@ -33,6 +33,7 @@ import org.apache.james.mailbox.store.StoreMailboxManager;
 import org.apache.james.mailbox.store.StoreMessageManager;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.impl.SimpleMailbox;
+import org.apache.james.mailbox.store.search.MessageSearchIndex;
 
 /**
  * Cassandra implementation of {@link StoreMailboxManager}
@@ -44,6 +45,12 @@ public class CassandraMailboxManager extends StoreMailboxManager<CassandraId> {
     public CassandraMailboxManager(CassandraMailboxSessionMapperFactory mapperFactory, Authenticator authenticator, final MailboxPathLocker locker) {
         super(mapperFactory, authenticator, locker, new UnionMailboxACLResolver(), new SimpleGroupMembershipResolver());
         this.locker = locker;
+    }
+
+    @Override
+    @Inject
+    public void setMessageSearchIndex(MessageSearchIndex<CassandraId> index) {
+        super.setMessageSearchIndex(index);
     }
 
     @Override
