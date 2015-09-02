@@ -118,7 +118,7 @@
         <junit.version>4.11</junit.version>
         <jasypt.version>1.9.0</jasypt.version>
         <guava.version>13.0</guava.version>
-        <assertj.version>2.0.0</assertj.version>
+        <assertj.version>1.7.1</assertj.version>
         <jackson-databinding.version>2.3.3</jackson-databinding.version>
         <cassandra-driver-core.version>2.1.5</cassandra-driver-core.version>
         <cassandra-unit.version>2.0.2.2</cassandra-unit.version>
