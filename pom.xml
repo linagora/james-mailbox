@@ -51,7 +51,6 @@
         <module>api</module>
         <module>caching</module>
         <module>cassandra</module>
-        <module>elasticsearch</module>
         <module>hbase</module>
         <module>jcr</module>
         <module>jpa</module>
@@ -60,7 +59,6 @@
         <module>memory</module>
         <module>store</module>
         <module>spring</module>
-        <module>tika</module>
         <module>tool</module>
         <module>zoo-seq-provider</module>
     </modules>
