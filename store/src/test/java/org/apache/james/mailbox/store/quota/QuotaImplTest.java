@@ -16,49 +16,39 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.mailbox.model;
 
-/**
- * A {@link Quota} restriction
- */
-public interface Quota {
+package org.apache.james.mailbox.store.quota;
 
-    /**
-     * Unlimited value
-     */
-    long UNLIMITED = -1;
+import static org.assertj.core.api.Assertions.assertThat;
 
-    /**
-     * Value not known
-     */
-    long UNKNOWN = Long.MIN_VALUE;
+import org.apache.james.mailbox.model.Quota;
+import org.junit.Test;
 
-    /**
-     * Return the maximum value for the {@link Quota}
-     *
-     * @return max
-     */
-    long getMax();
+public class QuotaImplTest {
 
-    /**
-     * Return the currently used for the {@link Quota}
-     *
-     * @return used
-     */
-    long getUsed();
+    @Test
+    public void unlimitedQuotaShouldNotBeOverQuota() {
+        assertThat(QuotaImpl.unlimited().isOverQuota()).isFalse();
+    }
 
-    /**
-     *  Adds the value to the quota.
-     */
-    void addValueToQuota(long value);
+    @Test
+    public void isOverQuotaShouldReturnFalseWhenQuotaIsNotExceeded() {
+        assertThat(QuotaImpl.quota(36, 360).isOverQuota()).isFalse();
+    }
 
-    Quota convertInKB();
+    @Test
+    public void isOverQuotaShouldReturnFalseWhenMaxValueIsUnlimited() {
+        assertThat(QuotaImpl.quota(36, Quota.UNLIMITED).isOverQuota()).isFalse();
+    }
 
-    /**
-     * Tells us if the quota is reached
-     *
-     * @return True if the user over uses the resource of this quota
-     */
-    boolean isOverQuota();
+    @Test
+    public void isOverQuotaShouldReturnFalseWhenUsedValueIsUnknown() {
+        assertThat(QuotaImpl.quota(Quota.UNKNOWN, 36).isOverQuota()).isFalse();
+    }
+
+    @Test
+    public void isOverQuotaShouldReturnTrueWhenQuotaIsExceeded() {
+        assertThat(QuotaImpl.quota(360, 36).isOverQuota()).isTrue();
+    }
 
 }
