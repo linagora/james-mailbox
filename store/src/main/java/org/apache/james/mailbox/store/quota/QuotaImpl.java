@@ -28,7 +28,8 @@ public final class QuotaImpl implements Quota{
     private final static Quota UNLIMITED_QUOTA = new QuotaImpl(UNKNOWN, UNLIMITED);
     
     private QuotaImpl(long used, long max) {
-        
+        this.max = max;
+        this.used = used;
     }
 
     @Override
