@@ -72,4 +72,13 @@ public class InMemoryPerUserMaxQuotaManager implements MaxQuotaManager {
         userMaxMessage.put(quotaRoot.getValue(), maxMessageCount);
     }
 
+    @Override
+    public long getDefaultMaxStorage() throws MailboxException {
+        return maxStorage;
+    }
+
+    @Override
+    public long getDefaultMaxMessage() throws MailboxException {
+        return maxMessage;
+    }
 }
