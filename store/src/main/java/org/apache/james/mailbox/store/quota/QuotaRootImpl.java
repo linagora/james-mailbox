@@ -17,19 +17,38 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.mailbox.quota;
+package org.apache.james.mailbox.store.quota;
 
-import org.apache.james.mailbox.exception.MailboxException;
-import org.apache.james.mailbox.model.MailboxPath;
+import com.google.common.base.Objects;
 import org.apache.james.mailbox.model.QuotaRoot;
 
-public interface QuotaRootPartitioner {
-    /**
-     * Return the quotaRoot associated with the given mailbox name.
-     *
-     * @param mailboxPath The name of the mailbox
-     * @return QuotaRoot ruling this mailbox ( we uses user owning this mailbox name )
-     * @throws MailboxException
-     */
-    QuotaRoot getQuotaRoot(MailboxPath mailboxPath) throws MailboxException;
+public class QuotaRootImpl implements QuotaRoot {
+
+    private String value;
+
+    private QuotaRootImpl(String value) {
+        this.value = value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof QuotaRoot)) {
+            return false;
+        }
+        return value.equals(((QuotaRoot) o).getValue());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(value);
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public static QuotaRoot quotaRoot(String value) {
+        return new QuotaRootImpl(value);
+    }
+
 }
