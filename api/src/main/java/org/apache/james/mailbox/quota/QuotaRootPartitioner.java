@@ -16,44 +16,20 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.mailbox.store.quota;
 
-import org.apache.james.mailbox.MailboxSession;
+package org.apache.james.mailbox.quota;
+
 import org.apache.james.mailbox.exception.MailboxException;
-import org.apache.james.mailbox.model.Quota;
-import org.apache.james.mailbox.store.StoreMailboxManager;
+import org.apache.james.mailbox.model.MailboxPath;
+import org.apache.james.mailbox.model.QuotaRoot;
 
-/**
- * {@link ListeningQuotaManager} which use the same quota for all users.
- * 
- * By default this means not quota at all
- */
-public class FixedQuotaManager extends ListeningQuotaManager{
-
-    @SuppressWarnings("rawtypes")
-    public FixedQuotaManager(StoreMailboxManager manager) throws MailboxException {
-        super(manager);
-    }
-
-    private long maxStorage = Quota.UNLIMITED;
-    private long maxMessage = Quota.UNLIMITED;
-
-    public void setMaxStorage(long maxStorage) {
-        this.maxStorage = maxStorage;
-    }
-    
-    public void setMaxMessage(long maxMessage) {
-        this.maxMessage = maxMessage;
-    }
-    
-    @Override
-    protected long getMaxStorage(MailboxSession session) throws MailboxException {
-        return maxStorage;
-    }
-
-    @Override
-    protected long getMaxMessage(MailboxSession session) throws MailboxException {
-        return maxMessage;
-    }
-
+public interface QuotaRootPartitioner {
+    /**
+     * Return the quotaRoot associated with the given mailbox name.
+     *
+     * @param mailboxPath The name of the mailbox
+     * @return QuotaRoot ruling this mailbox ( we uses user owning this mailbox name )
+     * @throws MailboxException
+     */
+    QuotaRoot getQuotaRoot(MailboxPath mailboxPath) throws MailboxException;
 }

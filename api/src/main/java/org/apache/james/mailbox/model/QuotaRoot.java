@@ -16,37 +16,14 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.mailbox.quota;
 
-import org.apache.james.mailbox.exception.MailboxException;
-import org.apache.james.mailbox.model.Quota;
-import org.apache.james.mailbox.model.QuotaRoot;
-
+package org.apache.james.mailbox.model;
 
 /**
- * Allows to get quotas for {@link QuotaRoot} which are bound to a user.
- * Part of RFC 2087 implementation
+ * Represents RFC 2087 Quota root
  */
-public interface QuotaManager {
+public interface QuotaRoot {
 
-    /**
-     * Return the message count {@link Quota} for the given {@link QuotaRoot} (which in fact is
-     * bound to a user)
-     *
-     * @param quotaRoot Quota root argument from RFC 2087 ( correspond to the user owning this mailbox )
-     * @return quota
-     * @throws MailboxException
-     */
-    Quota getMessageQuota(QuotaRoot quotaRoot) throws MailboxException;
+    String getValue();
 
-
-    /**
-     * Return the message storage {@link Quota} for the given {@link QuotaRoot} (which in fact is
-     * bound to a user)
-     *
-     * @param quotaRoot Quota root argument from RFC 2087 ( correspond to the user owning this mailbox )
-     * @return quota
-     * @throws MailboxException
-     */
-    Quota getStorageQuota(QuotaRoot quotaRoot) throws MailboxException;
 }
