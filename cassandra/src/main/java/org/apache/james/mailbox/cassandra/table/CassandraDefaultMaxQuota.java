@@ -17,15 +17,14 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.mailbox.inmemory.quota;
+package org.apache.james.mailbox.cassandra.table;
 
-import org.apache.james.mailbox.quota.MaxQuotaManager;
-import org.apache.james.mailbox.store.quota.GenericMaxQuotaManagerTest;
+public interface CassandraDefaultMaxQuota {
+    String TABLE_NAME = "defaultMaxQuota";
 
-public class InMemoryPerUserMaxQuotaManagerTest extends GenericMaxQuotaManagerTest {
+    String TYPE = "type";
+    String VALUE = "value";
 
-    protected MaxQuotaManager provideMaxQuotaManager() {
-        return new InMemoryPerUserMaxQuotaManager();
-    }
-
+    String MESSAGE = "message";
+    String STORAGE = "storage";
 }

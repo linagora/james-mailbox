@@ -17,15 +17,27 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.mailbox.inmemory.quota;
+package org.apache.james.mailbox.cassandra.quota;
 
+import org.apache.james.mailbox.cassandra.CassandraClusterSingleton;
 import org.apache.james.mailbox.quota.MaxQuotaManager;
 import org.apache.james.mailbox.store.quota.GenericMaxQuotaManagerTest;
+import org.junit.After;
 
-public class InMemoryPerUserMaxQuotaManagerTest extends GenericMaxQuotaManagerTest {
+public class CassandraPerUserMaxQuotaManagerTest extends GenericMaxQuotaManagerTest {
 
+    private CassandraClusterSingleton cassandra;
+
+    @Override
     protected MaxQuotaManager provideMaxQuotaManager() {
-        return new InMemoryPerUserMaxQuotaManager();
+        cassandra = CassandraClusterSingleton.build();
+        cassandra.ensureAllTables();
+        return new CassandraPerUserMaxQuotaManager(cassandra.getConf());
+    }
+
+    @After
+    public void cleanUp() {
+        cassandra.clearAllTables();
     }
 
 }
