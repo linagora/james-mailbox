@@ -33,6 +33,8 @@ import org.apache.james.mailbox.jpa.JPAMessageManager;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAEncryptedMessage;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAStreamingMessage;
+import org.apache.james.mailbox.quota.QuotaManager;
+import org.apache.james.mailbox.quota.QuotaRootResolver;
 import org.apache.james.mailbox.store.MailboxEventDispatcher;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
@@ -56,16 +58,18 @@ public class OpenJPAMessageManager extends JPAMessageManager {
     public OpenJPAMessageManager(MailboxSessionMapperFactory<JPAId> mapperFactory, 
     		MessageSearchIndex<JPAId> index,MailboxEventDispatcher<JPAId> dispatcher, 
     		MailboxPathLocker locker, Mailbox<JPAId> mailbox, MailboxACLResolver aclResolver, 
-    		GroupMembershipResolver groupMembershipResolver) throws MailboxException {
-        this(mapperFactory, index, dispatcher, locker,  mailbox, AdvancedFeature.None, aclResolver, groupMembershipResolver);
+    		GroupMembershipResolver groupMembershipResolver,
+            QuotaManager quotaManager, QuotaRootResolver quotaRootResolver) throws MailboxException {
+        this(mapperFactory, index, dispatcher, locker,  mailbox, AdvancedFeature.None, aclResolver, groupMembershipResolver, quotaManager, quotaRootResolver);
     }
 
     public OpenJPAMessageManager(MailboxSessionMapperFactory<JPAId> mapperFactory, 
     		MessageSearchIndex<JPAId> index, MailboxEventDispatcher<JPAId> dispatcher, 
     		MailboxPathLocker locker, Mailbox<JPAId> mailbox, final AdvancedFeature f, 
-    		MailboxACLResolver aclResolver, GroupMembershipResolver groupMembershipResolver) throws MailboxException {
+    		MailboxACLResolver aclResolver, GroupMembershipResolver groupMembershipResolver,
+            QuotaManager quotaManager, QuotaRootResolver quotaRootResolver) throws MailboxException {
     	
-        super(mapperFactory,  index, dispatcher, locker, mailbox, aclResolver, groupMembershipResolver);
+        super(mapperFactory,  index, dispatcher, locker, mailbox, aclResolver, groupMembershipResolver, quotaManager, quotaRootResolver);
         this.feature = f;
     }
 

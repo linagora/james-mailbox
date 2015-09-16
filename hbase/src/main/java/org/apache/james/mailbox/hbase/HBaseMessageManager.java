@@ -25,6 +25,8 @@ import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.acl.GroupMembershipResolver;
 import org.apache.james.mailbox.acl.MailboxACLResolver;
 import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.quota.QuotaManager;
+import org.apache.james.mailbox.quota.QuotaRootResolver;
 import org.apache.james.mailbox.store.MailboxEventDispatcher;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.StoreMessageManager;
@@ -38,8 +40,8 @@ import org.apache.james.mailbox.store.search.MessageSearchIndex;
 public class HBaseMessageManager extends StoreMessageManager<HBaseId> {
 
     public HBaseMessageManager(MailboxSessionMapperFactory<HBaseId> mapperFactory, MessageSearchIndex<HBaseId> index,
-            MailboxEventDispatcher<HBaseId> dispatcher, MailboxPathLocker locker, Mailbox<HBaseId> mailbox, MailboxACLResolver aclResolver, GroupMembershipResolver groupMembershipResolver) throws MailboxException {
-        super(mapperFactory, index, dispatcher, locker, mailbox, aclResolver, groupMembershipResolver);
+            MailboxEventDispatcher<HBaseId> dispatcher, MailboxPathLocker locker, Mailbox<HBaseId> mailbox, MailboxACLResolver aclResolver, GroupMembershipResolver groupMembershipResolver, QuotaManager quotaManager, QuotaRootResolver quotaRootResolver) throws MailboxException {
+        super(mapperFactory, index, dispatcher, locker, mailbox, aclResolver, groupMembershipResolver, quotaManager, quotaRootResolver);
 
     }
 

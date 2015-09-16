@@ -49,10 +49,16 @@ import org.apache.james.mailbox.model.MailboxPath;
 import org.apache.james.mailbox.model.MailboxQuery;
 import org.apache.james.mailbox.model.MessageRange;
 import org.apache.james.mailbox.model.SimpleMailboxACL;
+import org.apache.james.mailbox.quota.QuotaManager;
+import org.apache.james.mailbox.quota.QuotaRootResolver;
 import org.apache.james.mailbox.store.mail.MailboxMapper;
 import org.apache.james.mailbox.store.mail.model.MailboxId;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.impl.SimpleMailbox;
+import org.apache.james.mailbox.store.quota.DefaultQuotaRootResolver;
+import org.apache.james.mailbox.store.quota.ListeningCurrentQuotaUpdater;
+import org.apache.james.mailbox.store.quota.NoQuotaManager;
+import org.apache.james.mailbox.store.quota.QuotaUpdater;
 import org.apache.james.mailbox.store.search.ListeningMessageSearchIndex;
 import org.apache.james.mailbox.store.search.MessageSearchIndex;
 import org.apache.james.mailbox.store.search.SimpleMessageSearchIndex;
@@ -96,6 +102,12 @@ public class StoreMailboxManager<Id extends MailboxId> implements MailboxManager
 
     private MailboxSessionIdGenerator idGenerator;
 
+    private QuotaManager quotaManager;
+
+    private QuotaRootResolver quotaRootResolver;
+
+    private QuotaUpdater quotaUpdater;
+
     private int fetchBatchSize = DEFAULT_FETCH_BATCH_SIZE;
 
 
@@ -113,6 +125,18 @@ public class StoreMailboxManager<Id extends MailboxId> implements MailboxManager
 
     public void setMailboxSessionIdGenerator(MailboxSessionIdGenerator idGenerator) {
         this.idGenerator = idGenerator;
+    }
+
+    public void setQuotaManager(QuotaManager quotaManager) {
+        this.quotaManager = quotaManager;
+    }
+
+    public void setQuotaRootResolver(QuotaRootResolver quotaRootResolver) {
+        this.quotaRootResolver = quotaRootResolver;
+    }
+
+    public void setQuotaUpdater(QuotaUpdater quotaUpdater) {
+        this.quotaUpdater = quotaUpdater;
     }
 
     public void setCopyBatchSize(int copyBatchSize) {
@@ -142,11 +166,20 @@ public class StoreMailboxManager<Id extends MailboxId> implements MailboxManager
             index = new SimpleMessageSearchIndex<Id>(mailboxSessionMapperFactory);
         }
         if (index instanceof ListeningMessageSearchIndex) {
-            addGlobalListener((ListeningMessageSearchIndex) index, null);
+            this.addGlobalListener((ListeningMessageSearchIndex) index, null);
         }
 
         if (idGenerator == null) {
             idGenerator = new RandomMailboxSessionIdGenerator();
+        }
+        if (quotaManager == null) {
+            quotaManager = new NoQuotaManager();
+        }
+        if (quotaRootResolver == null) {
+            quotaRootResolver = new DefaultQuotaRootResolver(mailboxSessionMapperFactory);
+        }
+        if (quotaUpdater != null && quotaUpdater instanceof MailboxListener) {
+            this.addGlobalListener((MailboxListener) quotaUpdater, null);
         }
     }
 
@@ -172,6 +205,13 @@ public class StoreMailboxManager<Id extends MailboxId> implements MailboxManager
         return index;
     }
 
+    public QuotaRootResolver getQuotaRootResolver() {
+        return quotaRootResolver;
+    }
+
+    public QuotaManager getQuotaManager() {
+        return quotaManager;
+    }
 
     /**
      * Return the {@link MailboxEventDispatcher} used by thei {@link MailboxManager}
@@ -301,7 +341,7 @@ public class StoreMailboxManager<Id extends MailboxId> implements MailboxManager
      * @return storeMailbox
      */
     protected StoreMessageManager<Id> createMessageManager(Mailbox<Id> mailbox, MailboxSession session) throws MailboxException {
-        return new StoreMessageManager<Id>(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), getLocker(), mailbox, getAclResolver(), getGroupMembershipResolver());
+        return new StoreMessageManager<Id>(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), getLocker(), mailbox, getAclResolver(), getGroupMembershipResolver(), getQuotaManager(), getQuotaRootResolver());
     }
 
     /**

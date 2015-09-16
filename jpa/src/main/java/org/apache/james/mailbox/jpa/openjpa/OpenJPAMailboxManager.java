@@ -68,7 +68,15 @@ public class OpenJPAMailboxManager extends JPAMailboxManager {
 
     @Override
     protected StoreMessageManager<JPAId> createMessageManager(Mailbox<JPAId> mailboxRow, MailboxSession session) throws MailboxException {
-        StoreMessageManager<JPAId> result =  new OpenJPAMessageManager(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), getLocker(), mailboxRow, feature, getAclResolver(), getGroupMembershipResolver());
-        return result;
+        return new OpenJPAMessageManager(getMapperFactory(),
+            getMessageSearchIndex(),
+            getEventDispatcher(),
+            getLocker(),
+            mailboxRow,
+            feature,
+            getAclResolver(),
+            getGroupMembershipResolver(),
+            getQuotaManager(),
+            getQuotaRootResolver());
     }
 }

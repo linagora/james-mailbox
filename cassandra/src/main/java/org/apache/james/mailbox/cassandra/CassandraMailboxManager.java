@@ -39,7 +39,11 @@ public class CassandraMailboxManager extends StoreMailboxManager<CassandraId> {
     private MailboxPathLocker locker;
 
     public CassandraMailboxManager(CassandraMailboxSessionMapperFactory mapperFactory, Authenticator authenticator, final MailboxPathLocker locker) {
-        super(mapperFactory, authenticator, locker, new UnionMailboxACLResolver(), new SimpleGroupMembershipResolver());
+        super(mapperFactory,
+            authenticator,
+            locker,
+            new UnionMailboxACLResolver(),
+            new SimpleGroupMembershipResolver());
         this.locker = locker;
     }
 
@@ -52,7 +56,13 @@ public class CassandraMailboxManager extends StoreMailboxManager<CassandraId> {
 
     @Override
     protected StoreMessageManager<CassandraId> createMessageManager(Mailbox<CassandraId> mailboxRow, MailboxSession session) throws MailboxException {
-        return new CassandraMessageManager(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), this.locker, mailboxRow);
+        return new CassandraMessageManager(getMapperFactory(),
+            getMessageSearchIndex(),
+            getEventDispatcher(),
+            this.locker,
+            mailboxRow,
+            getQuotaManager(),
+            getQuotaRootResolver());
     }
 
 }

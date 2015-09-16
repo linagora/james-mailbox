@@ -17,41 +17,43 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.mailbox.cassandra;
+package org.apache.james.mailbox.store.quota;
 
-import javax.mail.Flags;
-
-import org.apache.james.mailbox.MailboxPathLocker;
-import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.acl.SimpleGroupMembershipResolver;
-import org.apache.james.mailbox.acl.UnionMailboxACLResolver;
 import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.exception.OverQuotaException;
+import org.apache.james.mailbox.model.MailboxPath;
+import org.apache.james.mailbox.model.Quota;
+import org.apache.james.mailbox.model.QuotaRoot;
 import org.apache.james.mailbox.quota.QuotaManager;
 import org.apache.james.mailbox.quota.QuotaRootResolver;
-import org.apache.james.mailbox.store.MailboxEventDispatcher;
-import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
-import org.apache.james.mailbox.store.StoreMessageManager;
 import org.apache.james.mailbox.store.mail.model.Mailbox;
-import org.apache.james.mailbox.store.search.MessageSearchIndex;
 
-/**
- * Cassandra implementation of {@link StoreMessageManager}
- * 
- */
-public class CassandraMessageManager extends StoreMessageManager<CassandraId> {
+public class QuotaChecker {
 
-    public CassandraMessageManager(MailboxSessionMapperFactory<CassandraId> mapperFactory, MessageSearchIndex<CassandraId> index, MailboxEventDispatcher<CassandraId> dispatcher, MailboxPathLocker locker, Mailbox<CassandraId> mailbox, QuotaManager quotaManager, QuotaRootResolver quotaRootResolver) throws MailboxException {
-        super(mapperFactory, index, dispatcher, locker, mailbox, new UnionMailboxACLResolver(), new SimpleGroupMembershipResolver(), quotaManager, quotaRootResolver);
+    private Quota messageQuota;
+    private Quota sizeQuota;
+    private QuotaRoot quotaRoot;
 
+    public QuotaChecker(QuotaManager quotaManager, QuotaRootResolver quotaRootResolver, Mailbox mailbox) throws MailboxException {
+        this.quotaRoot = quotaRootResolver.getQuotaRoot(new MailboxPath(mailbox.getNamespace(), mailbox.getUser(), mailbox.getName()));
+        this.messageQuota = quotaManager.getMessageQuota(quotaRoot);
+        this.sizeQuota = quotaManager.getStorageQuota(quotaRoot);
     }
 
-    /**
-     * Support user flags
-     */
-    @Override
-    protected Flags getPermanentFlags(MailboxSession session) {
-        Flags flags = super.getPermanentFlags(session);
-        flags.add(Flags.Flag.USER);
-        return flags;
+    public QuotaChecker addToQuotas(long count, long size) {
+        messageQuota.addValueToQuota(count);
+        sizeQuota.addValueToQuota(size);
+        return this;
     }
+
+    public boolean check() throws OverQuotaException {
+        if (messageQuota.isOverQuota() ) {
+            throw new OverQuotaException("You have too many messages in " + quotaRoot.getValue(), messageQuota.getMax(), messageQuota.getUsed());
+        }
+        if (sizeQuota.isOverQuota()) {
+            throw new OverQuotaException("You use too much space in " + quotaRoot.getValue(), sizeQuota.getMax(), sizeQuota.getUsed());
+        }
+        return true;
+    }
+
 }

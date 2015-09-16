@@ -58,6 +58,8 @@ import org.apache.james.mailbox.model.MessageResultIterator;
 import org.apache.james.mailbox.model.SearchQuery;
 import org.apache.james.mailbox.model.SimpleMailboxACL;
 import org.apache.james.mailbox.model.UpdatedFlags;
+import org.apache.james.mailbox.quota.QuotaManager;
+import org.apache.james.mailbox.quota.QuotaRootResolver;
 import org.apache.james.mailbox.store.mail.MessageMapper;
 import org.apache.james.mailbox.store.mail.MessageMapper.FetchType;
 import org.apache.james.mailbox.store.mail.MessageMapperFactory;
@@ -66,6 +68,7 @@ import org.apache.james.mailbox.store.mail.model.Mailbox;
 import org.apache.james.mailbox.store.mail.model.Message;
 import org.apache.james.mailbox.store.mail.model.impl.PropertyBuilder;
 import org.apache.james.mailbox.store.mail.model.impl.SimpleMessage;
+import org.apache.james.mailbox.store.quota.QuotaChecker;
 import org.apache.james.mailbox.store.search.MessageSearchIndex;
 import org.apache.james.mailbox.store.streaming.BodyOffsetInputStream;
 import org.apache.james.mailbox.store.streaming.CountingInputStream;
@@ -120,12 +123,16 @@ public class StoreMessageManager<Id extends MailboxId> implements org.apache.jam
 
     private final GroupMembershipResolver groupMembershipResolver;
 
+    private final QuotaManager quotaManager;
+
+    private final QuotaRootResolver quotaRootResolver;
+
     private MailboxPathLocker locker;
 
     private int fetchBatchSize;
 
     public StoreMessageManager(final MessageMapperFactory<Id> mapperFactory, final MessageSearchIndex<Id> index, final MailboxEventDispatcher<Id> dispatcher, final MailboxPathLocker locker, final Mailbox<Id> mailbox, final MailboxACLResolver aclResolver,
-            final GroupMembershipResolver groupMembershipResolver) throws MailboxException {
+            final GroupMembershipResolver groupMembershipResolver, final QuotaManager quotaManager, final QuotaRootResolver quotaRootResolver) throws MailboxException {
         this.mailbox = mailbox;
         this.dispatcher = dispatcher;
         this.mapperFactory = mapperFactory;
@@ -133,6 +140,8 @@ public class StoreMessageManager<Id extends MailboxId> implements org.apache.jam
         this.locker = locker;
         this.aclResolver = aclResolver;
         this.groupMembershipResolver = groupMembershipResolver;
+        this.quotaManager = quotaManager;
+        this.quotaRootResolver = quotaRootResolver;
     }
 
     public void setFetchBatchSize(int fetchBatchSize) {
@@ -362,6 +371,9 @@ public class StoreMessageManager<Id extends MailboxId> implements org.apache.jam
             final int size = (int) file.length();
 
             final Message<Id> message = createMessage(internalDate, size, bodyStartOctet, contentIn, flags, propertyBuilder);
+
+            new QuotaChecker(quotaManager, quotaRootResolver, mailbox).addToQuotas(1, size).check();
+
             return locker.executeWithLock(mailboxSession, new StoreMailboxPath<Id>(getMailboxEntity()), new MailboxPathLocker.LockAwareExecution<Long>() {
 
                 @Override
@@ -688,9 +700,11 @@ public class StoreMessageManager<Id extends MailboxId> implements org.apache.jam
     private Iterator<MessageMetaData> copy(final Iterator<Message<Id>> originalRows, final MailboxSession session) throws MailboxException {
         final List<MessageMetaData> copiedRows = new ArrayList<MessageMetaData>();
         final MessageMapper<Id> messageMapper = mapperFactory.getMessageMapper(session);
+        QuotaChecker quotaChecker = new QuotaChecker(quotaManager, quotaRootResolver, mailbox);
 
         while (originalRows.hasNext()) {
             final Message<Id> originalMessage = originalRows.next();
+            quotaChecker.addToQuotas(1, originalMessage.getFullContentOctets()).check();
             MessageMetaData data = messageMapper.execute(new Mapper.Transaction<MessageMetaData>() {
                 public MessageMetaData run() throws MailboxException {
                     return messageMapper.copy(getMailboxEntity(), originalMessage);
@@ -802,4 +816,5 @@ public class StoreMessageManager<Id extends MailboxId> implements org.apache.jam
     protected MailboxACL getResolvedMailboxACL(MailboxSession mailboxSession) throws UnsupportedRightException {
         return aclResolver.applyGlobalACL(mailbox.getACL(), new GroupFolderResolver(mailboxSession).isGroupFolder(mailbox));
     }
+
 }

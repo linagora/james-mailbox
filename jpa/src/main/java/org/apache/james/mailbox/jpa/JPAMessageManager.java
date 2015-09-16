@@ -30,6 +30,8 @@ import org.apache.james.mailbox.acl.MailboxACLResolver;
 import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.jpa.mail.model.JPAMailbox;
 import org.apache.james.mailbox.jpa.mail.model.openjpa.JPAMessage;
+import org.apache.james.mailbox.quota.QuotaManager;
+import org.apache.james.mailbox.quota.QuotaRootResolver;
 import org.apache.james.mailbox.store.MailboxEventDispatcher;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.StoreMessageManager;
@@ -46,9 +48,11 @@ public class JPAMessageManager extends StoreMessageManager<JPAId> {
     public JPAMessageManager(MailboxSessionMapperFactory<JPAId> mapperFactory, final MessageSearchIndex<JPAId> index, 
     			final MailboxEventDispatcher<JPAId> dispatcher, final MailboxPathLocker locker, 
     			final Mailbox<JPAId> mailbox, MailboxACLResolver aclResolver, 
-    			GroupMembershipResolver groupMembershipResolver) throws MailboxException {
+    			GroupMembershipResolver groupMembershipResolver, QuotaManager quotaManager,
+                QuotaRootResolver quotaRootResolver) throws MailboxException {
     	
-        super(mapperFactory, index, dispatcher, locker, mailbox, aclResolver, groupMembershipResolver);     
+        super(mapperFactory, index, dispatcher, locker, mailbox, aclResolver, groupMembershipResolver,
+            quotaManager, quotaRootResolver);
     }
     
     @Override
