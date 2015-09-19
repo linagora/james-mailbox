@@ -31,6 +31,9 @@
         <constructor-arg index="1" ref="authenticator"/>
         <constructor-arg index="2" ref="cassandra-locker"/>
         <property name="messageSearchIndex" ref="elasticsearch-listener"/>
+        <property name="quotaManager" ref="quotaManager"/>
+        <property name="quotaRootResolver" ref="quotaRootResolver"/>
+        <property name="quotaUpdater" ref="quotaUpdater"/>
     </bean>
 
     <bean id ="cassandra-subscriptionManager" class="org.apache.james.mailbox.cassandra.CassandraSubscriptionManager">
@@ -53,6 +56,14 @@
     </bean>
 
     <alias name="no-locker" alias="cassandra-locker"/>
+
+    <bean name="cassandraMaxQuotaManager" class="org.apache.james.mailbox.cassandra.quota.CassandraPerUserMaxQuotaManager">
+        <constructor-arg index="0" ref="cassandra-session"/>
+    </bean>
+
+    <bean name="cassandraCurrentQuotaManager" class="org.apache.james.mailbox.cassandra.quota.CassandraCurrentQuotaManager">
+        <constructor-arg index="0" ref="cassandra-session"/>
+    </bean>
 
     <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="ignoreUnresolvablePlaceholders" value="true"/>
