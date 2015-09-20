@@ -52,7 +52,16 @@ public class JCRMailboxManager extends StoreMailboxManager<JCRId> implements JCR
     
     @Override
     protected StoreMessageManager<JCRId> createMessageManager(Mailbox<JCRId> mailboxEntity, MailboxSession session) throws MailboxException{
-        return new JCRMessageManager(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), getLocker(), (JCRMailbox) mailboxEntity, getAclResolver(), getGroupMembershipResolver(), logger, getDelimiter());
+        return new JCRMessageManager(getMapperFactory(),
+            getMessageSearchIndex(),
+            getEventDispatcher(),
+            getLocker(),
+            (JCRMailbox) mailboxEntity,
+            getAclResolver(),
+            getGroupMembershipResolver(),
+            logger,
+            getQuotaManager(),
+            getQuotaRootResolver());
     }
 
     @Override

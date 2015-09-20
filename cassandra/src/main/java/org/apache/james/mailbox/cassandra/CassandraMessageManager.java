@@ -26,6 +26,8 @@ import org.apache.james.mailbox.MailboxSession;
 import org.apache.james.mailbox.acl.SimpleGroupMembershipResolver;
 import org.apache.james.mailbox.acl.UnionMailboxACLResolver;
 import org.apache.james.mailbox.exception.MailboxException;
+import org.apache.james.mailbox.quota.QuotaManager;
+import org.apache.james.mailbox.quota.QuotaRootResolver;
 import org.apache.james.mailbox.store.MailboxEventDispatcher;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.StoreMessageManager;
@@ -38,8 +40,8 @@ import org.apache.james.mailbox.store.search.MessageSearchIndex;
  */
 public class CassandraMessageManager extends StoreMessageManager<CassandraId> {
 
-    public CassandraMessageManager(MailboxSessionMapperFactory<CassandraId> mapperFactory, MessageSearchIndex<CassandraId> index, MailboxEventDispatcher<CassandraId> dispatcher, MailboxPathLocker locker, Mailbox<CassandraId> mailbox) throws MailboxException {
-        super(mapperFactory, index, dispatcher, locker, mailbox, new UnionMailboxACLResolver(), new SimpleGroupMembershipResolver());
+    public CassandraMessageManager(MailboxSessionMapperFactory<CassandraId> mapperFactory, MessageSearchIndex<CassandraId> index, MailboxEventDispatcher<CassandraId> dispatcher, MailboxPathLocker locker, Mailbox<CassandraId> mailbox, QuotaManager quotaManager, QuotaRootResolver quotaRootResolver) throws MailboxException {
+        super(mapperFactory, index, dispatcher, locker, mailbox, new UnionMailboxACLResolver(), new SimpleGroupMembershipResolver(), quotaManager, quotaRootResolver);
 
     }
 

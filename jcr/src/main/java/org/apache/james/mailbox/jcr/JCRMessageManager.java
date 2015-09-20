@@ -30,6 +30,8 @@ import org.apache.james.mailbox.acl.MailboxACLResolver;
 import org.apache.james.mailbox.exception.MailboxException;
 import org.apache.james.mailbox.jcr.mail.model.JCRMailbox;
 import org.apache.james.mailbox.jcr.mail.model.JCRMessage;
+import org.apache.james.mailbox.quota.QuotaManager;
+import org.apache.james.mailbox.quota.QuotaRootResolver;
 import org.apache.james.mailbox.store.MailboxEventDispatcher;
 import org.apache.james.mailbox.store.MailboxSessionMapperFactory;
 import org.apache.james.mailbox.store.StoreMessageManager;
@@ -47,8 +49,8 @@ public class JCRMessageManager extends StoreMessageManager<JCRId> {
     private final Logger log;
 
     public JCRMessageManager(MailboxSessionMapperFactory<JCRId> mapperFactory, MessageSearchIndex<JCRId> index, 
-            final MailboxEventDispatcher<JCRId> dispatcher, final MailboxPathLocker locker, final JCRMailbox mailbox, MailboxACLResolver aclResolver, GroupMembershipResolver groupMembershipResolver, final Logger log, final char delimiter) throws MailboxException {
-        super(mapperFactory, index, dispatcher, locker, mailbox, aclResolver, groupMembershipResolver);
+            final MailboxEventDispatcher<JCRId> dispatcher, final MailboxPathLocker locker, final JCRMailbox mailbox, MailboxACLResolver aclResolver, GroupMembershipResolver groupMembershipResolver, final Logger log, QuotaManager quotaManager, QuotaRootResolver quotaRootResolver) throws MailboxException {
+        super(mapperFactory, index, dispatcher, locker, mailbox, aclResolver, groupMembershipResolver, quotaManager, quotaRootResolver);
         this.log = log;
     }
 

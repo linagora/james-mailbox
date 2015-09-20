@@ -18,17 +18,19 @@
  ****************************************************************/
 package org.apache.james.mailbox.store.quota;
 
+import com.google.common.base.Objects;
 import org.apache.james.mailbox.model.Quota;
 
 public final class QuotaImpl implements Quota{
-    
+
     private long max;
     private long used;
 
     private final static Quota UNLIMITED_QUOTA = new QuotaImpl(UNKNOWN, UNLIMITED);
-    
+
     private QuotaImpl(long used, long max) {
-        
+        this.used = used;
+        this.max = max;
     }
 
     @Override
@@ -40,25 +42,50 @@ public final class QuotaImpl implements Quota{
     public long getUsed() {
         return used;
     }
-    
-    /**
-     * Return a {@link Quota} which in fact is unlimited
-     * 
-     * @return unlimited
-     */
+
+    @Override
+    public void addValueToQuota(long value) {
+        used += value;
+    }
+
+    @Override
+    public Quota convertInKB() {
+        return new QuotaImpl(used/1024, max/1024);
+    }
+
+    @Override
+    public boolean isOverQuota() {
+        if(max == UNLIMITED) {
+            return false;
+        }
+        return used > max;
+    }
+
     public static Quota unlimited() {
         return UNLIMITED_QUOTA;
     }
-    
-    /**
-     * Return a {@link Quota} for the given values
-     * 
-     * @param max
-     * @param used
-     * @return quota
-     */
-    public static Quota quota(long max , long used) {
+
+    public static Quota quota(long used , long max) {
         return new QuotaImpl(used, max);
     }
 
+    @Override
+    public String toString() {
+        return used + "/" + max;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || ! (o instanceof  Quota)) {
+            return false;
+        }
+        Quota other = (Quota) o;
+        return used == other.getUsed()
+            && max == other.getMax();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(used, max);
+    }
 }

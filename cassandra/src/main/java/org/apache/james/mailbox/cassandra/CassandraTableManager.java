@@ -36,8 +36,11 @@ import com.datastax.driver.core.schemabuilder.SchemaBuilder;
 import com.datastax.driver.core.schemabuilder.SchemaStatement;
 
 import org.apache.james.mailbox.cassandra.table.CassandraACLTable;
+import org.apache.james.mailbox.cassandra.table.CassandraCurrentQuota;
+import org.apache.james.mailbox.cassandra.table.CassandraDefaultMaxQuota;
 import org.apache.james.mailbox.cassandra.table.CassandraMailboxCountersTable;
 import org.apache.james.mailbox.cassandra.table.CassandraMailboxTable;
+import org.apache.james.mailbox.cassandra.table.CassandraMaxQuota;
 import org.apache.james.mailbox.cassandra.table.CassandraMessageModseqTable;
 import org.apache.james.mailbox.cassandra.table.CassandraMessageTable;
 import org.apache.james.mailbox.cassandra.table.CassandraMessageUidTable;
@@ -109,7 +112,24 @@ public class CassandraTableManager {
             SchemaBuilder.createTable(CassandraMessageModseqTable.TABLE_NAME)
                 .ifNotExists()
                 .addPartitionKey(CassandraMessageModseqTable.MAILBOX_ID, timeuuid())
-                .addColumn(CassandraMessageModseqTable.NEXT_MODSEQ, bigint()))
+                .addColumn(CassandraMessageModseqTable.NEXT_MODSEQ, bigint())),
+        CurrentQuota(CassandraCurrentQuota.TABLE_NAME,
+            SchemaBuilder.createTable(CassandraCurrentQuota.TABLE_NAME)
+                .ifNotExists()
+                .addPartitionKey(CassandraCurrentQuota.QUOTA_ROOT, text())
+                .addColumn(CassandraCurrentQuota.MESSAGE_COUNT, counter())
+                .addColumn(CassandraCurrentQuota.STORAGE, counter())),
+        MaxQuota(CassandraMaxQuota.TABLE_NAME,
+            SchemaBuilder.createTable(CassandraMaxQuota.TABLE_NAME)
+                .ifNotExists()
+                .addPartitionKey(CassandraMaxQuota.QUOTA_ROOT, text())
+                .addColumn(CassandraMaxQuota.MESSAGE_COUNT, bigint())
+                .addColumn(CassandraMaxQuota.STORAGE, bigint())),
+        DefaultMaxQuota(CassandraDefaultMaxQuota.TABLE_NAME,
+            SchemaBuilder.createTable(CassandraDefaultMaxQuota.TABLE_NAME)
+                .ifNotExists()
+                .addPartitionKey(CassandraDefaultMaxQuota.TYPE, text())
+                .addColumn(CassandraDefaultMaxQuota.VALUE, bigint()))
         ;
 
         private Create createStatement;

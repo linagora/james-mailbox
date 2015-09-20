@@ -16,44 +16,14 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.mailbox.store.quota;
 
-import org.apache.james.mailbox.MailboxSession;
-import org.apache.james.mailbox.exception.MailboxException;
-import org.apache.james.mailbox.model.Quota;
-import org.apache.james.mailbox.store.StoreMailboxManager;
+package org.apache.james.mailbox.cassandra.table;
 
-/**
- * {@link ListeningQuotaManager} which use the same quota for all users.
- * 
- * By default this means not quota at all
- */
-public class FixedQuotaManager extends ListeningQuotaManager{
+public interface CassandraCurrentQuota {
 
-    @SuppressWarnings("rawtypes")
-    public FixedQuotaManager(StoreMailboxManager manager) throws MailboxException {
-        super(manager);
-    }
+    String TABLE_NAME = "currentQuota";
 
-    private long maxStorage = Quota.UNLIMITED;
-    private long maxMessage = Quota.UNLIMITED;
-
-    public void setMaxStorage(long maxStorage) {
-        this.maxStorage = maxStorage;
-    }
-    
-    public void setMaxMessage(long maxMessage) {
-        this.maxMessage = maxMessage;
-    }
-    
-    @Override
-    protected long getMaxStorage(MailboxSession session) throws MailboxException {
-        return maxStorage;
-    }
-
-    @Override
-    protected long getMaxMessage(MailboxSession session) throws MailboxException {
-        return maxMessage;
-    }
-
+    String QUOTA_ROOT = "quotaRoot";
+    String MESSAGE_COUNT = "messageCount";
+    String STORAGE = "storage";
 }

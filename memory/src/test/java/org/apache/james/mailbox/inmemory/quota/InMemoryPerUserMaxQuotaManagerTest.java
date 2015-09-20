@@ -16,37 +16,16 @@
  * specific language governing permissions and limitations      *
  * under the License.                                           *
  ****************************************************************/
-package org.apache.james.mailbox;
 
-import org.apache.james.mailbox.exception.MailboxException;
-import org.apache.james.mailbox.model.Quota;
+package org.apache.james.mailbox.inmemory.quota;
 
+import org.apache.james.mailbox.quota.MaxQuotaManager;
+import org.apache.james.mailbox.store.quota.GenericMaxQuotaManagerTest;
 
-/**
- * Allows to get quotas for {@link MailboxSession} which are bound to a user.
- * 
- */
-public interface QuotaManager {
+public class InMemoryPerUserMaxQuotaManagerTest extends GenericMaxQuotaManagerTest {
 
-    /**
-     * Return the message count {@link Quota} for the given {@link MailboxSession} (which in fact is 
-     * bound to a user)
-     * 
-     * @param session
-     * @return quota
-     * @throws MailboxException
-     */
-    public Quota getMessageQuota(MailboxSession session) throws MailboxException;
+    protected MaxQuotaManager provideMaxQuotaManager() {
+        return new InMemoryPerUserMaxQuotaManager();
+    }
 
-    
-    /**
-     * Return the message storage {@link Quota} for the given {@link MailboxSession} (which in fact is 
-     * bound to a user)
-     * 
-     * @param session
-     * @return quota
-     * @throws MailboxException
-     */
-    public Quota getStorageQuota(MailboxSession session) throws MailboxException;
-    
 }

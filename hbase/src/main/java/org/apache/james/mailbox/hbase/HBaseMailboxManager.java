@@ -82,7 +82,15 @@ public class HBaseMailboxManager extends StoreMailboxManager<HBaseId> {
 
     @Override
     protected StoreMessageManager<HBaseId> createMessageManager(Mailbox<HBaseId> mailboxRow, MailboxSession session) throws MailboxException {
-        StoreMessageManager<HBaseId> result = new HBaseMessageManager(getMapperFactory(), getMessageSearchIndex(), getEventDispatcher(), getLocker(), mailboxRow, getAclResolver(), getGroupMembershipResolver());
+        StoreMessageManager<HBaseId> result = new HBaseMessageManager(getMapperFactory(),
+            getMessageSearchIndex(),
+            getEventDispatcher(),
+            getLocker(),
+            mailboxRow,
+            getAclResolver(),
+            getGroupMembershipResolver(),
+            getQuotaManager(),
+            getQuotaRootResolver());
         return result;
     }
 }

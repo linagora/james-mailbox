@@ -33,6 +33,9 @@
         <constructor-arg index="2" ref="jcr-locker"/>
         <constructor-arg index="3" ref="aclResolver"/>
         <constructor-arg index="4" ref="groupMembershipResolver"/>
+        <property name="quotaManager" ref="quotaManager"/>
+        <property name="quotaRootResolver" ref="quotaRootResolver"/>
+        <property name="quotaUpdater" ref="quotaUpdater"/>
     </bean>
     <bean id ="jcr-subscriptionManager" class="org.apache.james.mailbox.jcr.JCRSubscriptionManager">
         <constructor-arg index="0" ref="jcr-sessionMapperFactory"/>
